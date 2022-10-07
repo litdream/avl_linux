@@ -5,3 +5,4 @@ all: $(OBJ)
 
 clean:
 	rm -f $(OBJ)
+	rm -f a.out
