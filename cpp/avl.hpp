@@ -36,23 +36,26 @@
 
 extern int errno;
 
-template <typename T>
-struct AVLNode {
-    AVLNode(std::string &_id, T *_data) : id(_id), data(_data) {}
-    AVLNode(const char *_id, T *_data) : id(_id), data(_data) {}
 
+// static:  Only necessary for AVLTree wrapper.  No need to export this type.
+static struct AVLNode {
     char id[MAX_ID_LEN];
     T *data;
+    avl_note_t  my_link;      // for AVL node relation.
 };
+
 
 template <typename T>
 class AVLTree {
+    
     AVLTree() {
         // We have to use C-malloc() to get bare memory block.
         T *_tmp_data = malloc( sizeof(T));
-        if (_tmp_data != NULL) {
+        if (_tmp_data == NULL) {
+            errno = ENOMEM;
+        }else {
             AVLNode _tmp("__dummy_for_init_only", _tmp_data) ;
-            avl_create( &(this->avl), AVLNode<T>, sizeof(AVLNode<T>), OFFSETOF(_tmp));
+            avl_create( &(this->avl), 
             free(_tmp_data);
         }
     }
@@ -76,6 +79,7 @@ class AVLTree {
     void debugPrintTree() {
         using std::cerr, std::endl;
     }
+    
 private:
     avl_tree_t avl;
 };
