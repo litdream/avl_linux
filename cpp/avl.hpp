@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <cstdlib>
 #include <cerrno>
 #include "../avl.h"
@@ -39,7 +40,7 @@ extern int errno;
 
 // static:  Only necessary for AVLTree wrapper.  No need to export this type.
 static struct AVLNode {
-    char id[MAX_ID_LEN];
+    char id[MAX_ID_LEN+1];
     T *data;
     avl_note_t  my_link;      // for AVL node relation.
 };
@@ -64,19 +65,47 @@ class AVLTree
     }
 
     bool insertNode(const char *id, T *data) {
-        // return true/false for insertion result.
-        //  - for error: use cerrno for error code.  (extern int) errno.
+        AVLNode *ins = malloc(sizeof(AVLNode));
+        if (ins == NULL) {
+            errno = ENOMEM;   // allocation fail
+            return false;
+        }
+        
+        size_t cpn = strncpy(ins->id, id, MAX_ID_LEN);
+        ins->id[cpn] = '\0';
+        if ( this->getNode(ins->id) == NULL ) {
+            errno = ENOTUNIQ;  // id already exists.
+            goto insert_fail;
+        }
+ 
+        avl_add(&(this->avl), ins);
+        return true;
+        
+    insert_fail:
+        free(ins);
+        return false;
     }
 
     T* getNode(const char *id) {
         // do not allow duplicate!
-        
-        // TODO: return a correct object, or errno
-        return nullptr;
+        AVLNode *srch = avl_find( &(this->avl), id, NULL);
+        if (srch)
+            return srch->data;
+        else
+            return NULL;
     }
 
-    bool deleteNode(const char *id) {
-        // follow insertNode() return
+    T* deleteNode(const char *id) {
+        if (this->getNode(id)) {
+            AVLNode *srch = avl_find( &(this->avl), id, NULL);
+            T *rtn = srch->data;
+            free(srch);
+            return rtn;
+        }
+        else {
+            return NULL;
+        }
+        
     }
 
     void debugPrintTree() {
