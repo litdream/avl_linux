@@ -33,25 +33,27 @@
 #include "../avl.h"
 
 #define MAX_ID_LEN 100
-#define OFFSETOF(node) ( sizeof(node->id) + sizeof(void *) )
+#define OFFSETOF(node) ( sizeof(node.id) + sizeof(void *) )
 
 extern int errno;
 
 
 // static:  Only necessary for AVLTree wrapper.  No need to export this type.
-static struct AVLNode {
+template <typename T>
+struct AVLNode {
     char id[MAX_ID_LEN+1];
     T *data;
-    avl_note_t  my_link;      // for AVL node relation.
+    avl_node_t  my_link;      // for AVL node relation.
 };
 
+template <typename T>
 static int compareAVLNode(const void *a, const void *b)
 {
-    AVLNode *_a = (AVLNode *)a;
-    AVLNode *_b = (AVLNode *)b;
-    if ( strncmp(_a->id, _b->id, NAME_LEN) < 0 )
+    AVLNode<T> *_a = (AVLNode<T> *)a;
+    AVLNode<T> *_b = (AVLNode<T> *)b;
+    if ( strncmp(_a->id, _b->id, MAX_ID_LEN) < 0 )
         return -1;
-    else if ( strncmp(_a->id, _b->id, NAME_LEN) > 0 )
+    else if ( strncmp(_a->id, _b->id, MAX_ID_LEN) > 0 )
         return 1;
     return 0;
 }
@@ -59,13 +61,14 @@ static int compareAVLNode(const void *a, const void *b)
 template <typename T>
 class AVLTree
 {
+public:    
     AVLTree() {
-        struct AVLNode tmpnode;   // only used to calculate offset
-        avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode), OFFSETOF(&tmpnode));
+        AVLNode<T> tmpnode;   // only used to calculate offset
+        avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode<T>), OFFSETOF(tmpnode));
     }
 
     bool insertNode(const char *id, T *data) {
-        AVLNode *ins = malloc(sizeof(AVLNode));
+        AVLNode<T> *ins = malloc(sizeof(AVLNode<T>));
         if (ins == NULL) {
             errno = ENOMEM;   // allocation fail
             return false;
@@ -74,7 +77,7 @@ class AVLTree
         size_t cpn = strncpy(ins->id, id, MAX_ID_LEN);
         ins->id[cpn] = '\0';
         if ( this->getNode(ins->id) == NULL ) {
-            errno = ENOTUNIQ;  // id already exists.
+            errno = EEXIST;  // id already exists.
             goto insert_fail;
         }
  
@@ -88,7 +91,7 @@ class AVLTree
 
     T* getNode(const char *id) {
         // do not allow duplicate!
-        AVLNode *srch = avl_find( &(this->avl), id, NULL);
+        AVLNode<T> *srch = avl_find( &(this->avl), id, NULL);
         if (srch)
             return srch->data;
         else
@@ -97,7 +100,7 @@ class AVLTree
 
     T* deleteNode(const char *id) {
         if (this->getNode(id)) {
-            AVLNode *srch = avl_find( &(this->avl), id, NULL);
+            AVLNode<T> *srch = avl_find( &(this->avl), id, NULL);
             T *rtn = srch->data;
             free(srch);
             return rtn;

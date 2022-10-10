@@ -31,22 +31,12 @@ int comparePerson(const void *a, const void *b)
 
 Person* searchByName(avl_tree_t *tree, const char *name)
 {
-	Person *cur = AVL_NODE2DATA(tree->avl_root, tree->avl_offset);
-	avl_node_t *p;
-	while (cur) {
-		if (strcmp(cur->name, name) == 0)
-			return cur;
-		else if (strcmp(name, cur->name) <0) {
-			p = AVL_DATA2NODE( cur, tree->avl_offset );
-			p = p->avl_child[0];
-		}
-		else {
-			p = AVL_DATA2NODE( cur, tree->avl_offset );
-			p = p->avl_child[1];
-		}
-		cur = p ? AVL_NODE2DATA( p, tree->avl_offset) : NULL;
-	}
-	return NULL;
+	avl_index_t idx;
+	Person *cur = avl_find(tree, name, &idx);
+
+	// AT the time, not using idx.  But, idx is useful.
+	return cur;
+	
 }
 
 void printTree(avl_tree_t *tree)
