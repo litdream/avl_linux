@@ -32,7 +32,7 @@
 #include "../avl.h"
 
 #define MAX_ID_LEN 100
-#define OFFSETOF(node) ( sizeof(node->id) )
+#define OFFSETOF(node) ( sizeof(node->id) + sizeof(void *) )
 
 extern int errno;
 
@@ -44,20 +44,23 @@ static struct AVLNode {
     avl_note_t  my_link;      // for AVL node relation.
 };
 
+static int compareAVLNode(const void *a, const void *b)
+{
+    AVLNode *_a = (AVLNode *)a;
+    AVLNode *_b = (AVLNode *)b;
+    if ( strncmp(_a->id, _b->id, NAME_LEN) < 0 )
+        return -1;
+    else if ( strncmp(_a->id, _b->id, NAME_LEN) > 0 )
+        return 1;
+    return 0;
+}
 
 template <typename T>
-class AVLTree {
-    
+class AVLTree
+{
     AVLTree() {
-        // We have to use C-malloc() to get bare memory block.
-        T *_tmp_data = malloc( sizeof(T));
-        if (_tmp_data == NULL) {
-            errno = ENOMEM;
-        }else {
-            AVLNode _tmp("__dummy_for_init_only", _tmp_data) ;
-            avl_create( &(this->avl), 
-            free(_tmp_data);
-        }
+        struct AVLNode tmpnode;   // only used to calculate offset
+        avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode), OFFSETOF(&tmpnode));
     }
 
     bool insertNode(const char *id, T *data) {
