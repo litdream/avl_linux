@@ -46,14 +46,15 @@ struct AVLNode {
     avl_node_t  my_link;      // for AVL node relation.
 };
 
-template <typename T>
-static int compareAVLNode(const void *a, const void *b)
+int compareAVLNode(const void *a, const void *b)
 {
-    AVLNode<T> *_a = (AVLNode<T> *)a;
-    AVLNode<T> *_b = (AVLNode<T> *)b;
-    if ( strncmp(_a->id, _b->id, MAX_ID_LEN) < 0 )
+    // This only works, because we put AVLNode id as the first member.
+    const char *id1 = (const char *)a;
+    const char *id2 = (const char *)b;
+    
+    if ( strncmp(id1, id2, MAX_ID_LEN) < 0 )
         return -1;
-    else if ( strncmp(_a->id, _b->id, MAX_ID_LEN) > 0 )
+    else if ( strncmp(id1, id2, MAX_ID_LEN) > 0 )
         return 1;
     return 0;
 }
@@ -68,14 +69,14 @@ public:
     }
 
     bool insertNode(const char *id, T *data) {
-        AVLNode<T> *ins = malloc(sizeof(AVLNode<T>));
+        AVLNode<T> *ins = (AVLNode<T> *)malloc(sizeof(AVLNode<T>));
         if (ins == NULL) {
             errno = ENOMEM;   // allocation fail
             return false;
         }
         
-        size_t cpn = strncpy(ins->id, id, MAX_ID_LEN);
-        ins->id[cpn] = '\0';
+        strncpy(ins->id, id, MAX_ID_LEN);
+        (ins->id)[MAX_ID_LEN] = '\0';
         if ( this->getNode(ins->id) == NULL ) {
             errno = EEXIST;  // id already exists.
             goto insert_fail;
@@ -91,7 +92,7 @@ public:
 
     T* getNode(const char *id) {
         // do not allow duplicate!
-        AVLNode<T> *srch = avl_find( &(this->avl), id, NULL);
+        AVLNode<T> *srch = (AVLNode<T> *)avl_find( &(this->avl), id, NULL);
         if (srch)
             return srch->data;
         else
@@ -100,7 +101,7 @@ public:
 
     T* deleteNode(const char *id) {
         if (this->getNode(id)) {
-            AVLNode<T> *srch = avl_find( &(this->avl), id, NULL);
+            AVLNode<T> *srch =  (AVLNode<T> *)avl_find( &(this->avl), id, NULL);
             T *rtn = srch->data;
             free(srch);
             return rtn;

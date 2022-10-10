@@ -31,6 +31,9 @@ int main(int argc, char **argv)
 
     Person b("Jake", 17);
     avl.insertNode( b.getName().c_str(), &b);
+
+    Person *srch = avl.getNode(a.getName().c_str());
+    std::cout << *srch << '\n';
     
     return 0;
 }
