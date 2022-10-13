@@ -19,7 +19,11 @@
        If we abstract malloc/free from the user, that means we can't use smart-pointer.
        I have to handle malloc/free inside of AVLTree, correctly.  Not leaking memory.
 
-       
+
+
+Compile:
+g++ --std=c++2a -I.. -Wall -g simple.cpp ../avl.o
+
  */
 
 #ifndef __AVL_HPP
@@ -30,10 +34,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <cerrno>
-#include "../avl.h"
+#include <cstddef>
+#include <avl.h>
 
 #define MAX_ID_LEN 100
-#define OFFSETOF(node) ( sizeof(node.id) + sizeof(void *) )
 
 extern int errno;
 
@@ -67,7 +71,7 @@ public:
         AVLNode<T> tmpnode;   // only used to calculate offset
         memset(&tmpnode, '\0', sizeof(tmpnode) );  
         strcpy(tmpnode.id, "shouldnotbeadded");
-        avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode<T>), OFFSETOF(tmpnode));
+        avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode<T>), offsetof(struct AVLNode<T>, my_link));
     }
 
     bool insertNode(const char *id, T *data) {
