@@ -65,6 +65,8 @@ class AVLTree
 public:    
     AVLTree() {
         AVLNode<T> tmpnode;   // only used to calculate offset
+        memset(&tmpnode, '\0', sizeof(tmpnode) );  
+        strcpy(tmpnode.id, "shouldnotbeadded");
         avl_create( &(this->avl), compareAVLNode, sizeof(struct AVLNode<T>), OFFSETOF(tmpnode));
     }
 
