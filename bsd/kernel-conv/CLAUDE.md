@@ -77,6 +77,8 @@ avl_impl.h      - Internal structures and macros
 avl.c           - Complete implementation
 Makefile        - Build system (static lib, shared lib, tests)
 simple_test.c   - Test program
+CMakeLists.txt  - CMake build configuration for Google Test
+avl_unittest.cpp - Comprehensive C++ unit tests with Google Test
 README.md       - User documentation
 MIGRATION.md    - Upgrade guide
 PORTING_NOTES.txt - Technical summary
@@ -118,6 +120,70 @@ lala not found
    - Tree traversal (in-order)
    - Node counting
    - Root node tracking
+
+## Google Test Unit Tests (Added November 25, 2025)
+
+### How to Build and Run
+
+```bash
+# Create build directory
+mkdir build
+cd build
+
+# Configure with CMake
+cmake ..
+
+# Build the tests
+make
+
+# Run the tests
+./avl_unittest
+
+# Or use CTest
+ctest --output-on-failure
+
+# Or use the custom target
+make check
+```
+
+### Test Coverage
+
+The comprehensive C++ unit test suite (`avl_unittest.cpp`) includes:
+
+**Basic Operations:**
+- Tree creation and initialization
+- Single and multiple node insertions
+- Node removal (leaf, one child, two children)
+
+**AVL Balancing Tests:**
+- Left-left rotation case
+- Right-right rotation case
+- Left-right rotation case
+- Right-left rotation case
+
+**Search & Traversal:**
+- Finding existing and non-existing nodes
+- Forward traversal (AVL_NEXT)
+- Backward traversal (AVL_PREV)
+- First and last node operations
+- Nearest node operations (AVL_BEFORE/AVL_AFTER)
+
+**Advanced Operations:**
+- `avl_insert` with where parameter
+- `avl_insert_here` with direction
+- `avl_swap` for swapping trees
+- `avl_update`, `avl_update_lt`, `avl_update_gt`
+- `avl_destroy_nodes` for cleanup
+
+**Stress Tests:**
+- Large tree with 1000 random insertions
+- Insert and remove all 100 nodes
+- Dynamic memory allocation tests
+
+**Macro Tests:**
+- TREE_CMP, TREE_ISIGN, TREE_PCMP
+
+**Total: 30+ test cases** with automatic tree invariant verification
 
 ## License Compliance
 

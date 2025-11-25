@@ -42,7 +42,8 @@ test: $(TEST)
 	./$(TEST)
 
 clean:
-	rm -f $(OBJS) $(LIB) $(SOLIB) $(TEST)
+	rm -f $(OBJS) $(LIB) $(SOLIB) $(TEST) 
+	rm -rf build/
 
 install: $(LIB) $(SOLIB)
 	install -d $(DESTDIR)/usr/local/lib
